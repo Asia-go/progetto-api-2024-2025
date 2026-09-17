@@ -1,0 +1,8 @@
+# File di configurazione di CLion
+.idea/
+
+# Cartelle di compilazione di CMake
+cmake-build-*/
+
+# Eseguibili compilati
+*.exe
