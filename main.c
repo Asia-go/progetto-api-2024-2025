@@ -67,7 +67,7 @@ void change_cost(int x, int y, int v, int range);
 axial_coordinates* calc_ring(int x, int y, int distance);
 void toggle_air_route(int x1, int y1, int x2, int y2);
 void travel_cost(int xp, int yp, int xd, int yd);
-int calc_neighbours(int x, int y);
+int find_neighbours(int x, int y);
 void insert_node(heap* min_heap, int x, int y, int distance);
 void order_heap_up(heap* min_heap, int i);
 void extract_node(heap* min_heap);
@@ -322,7 +322,7 @@ void travel_cost(int xp, int yp, int xd, int yd) {
 
         if (grid[y][x].cost == 0)
             continue;
-        current_neighbours = calc_neighbours(x, y);
+        current_neighbours = find_neighbours(x, y);
         for (int l = 0; l < current_neighbours; l++) {
             if (grid[neighbours[l].y][neighbours[l].x].distance == DIST_DIJKSTRA)
                 insert_node(min_heap, neighbours[l].x, neighbours[l].y, distance);
@@ -353,7 +353,7 @@ void travel_cost(int xp, int yp, int xd, int yd) {
 }
 
 // Calculate valid grid neighbors for a given target hex
-int calc_neighbours(int x, int y) {
+int find_neighbours(int x, int y) {
     int current_x = x + 1, current_y = y, current_neighbours = 0;
 
     for (int i = 0; i < MAX_NEIGHBOURS; i++) {
