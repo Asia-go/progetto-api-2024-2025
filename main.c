@@ -64,7 +64,7 @@ cache *route = NULL;
 
 void init(int x, int y);
 void change_cost(int x, int y, int v, int range);
-axial_coordinates* calc_ring(int x, int y, int distance);
+void calc_ring(int x, int y, int distance, axial_coordinates *ring);
 void toggle_air_route(int x1, int y1, int x2, int y2);
 void travel_cost(int xp, int yp, int xd, int yd);
 int find_neighbours(int x, int y);
@@ -129,11 +129,10 @@ void init(int x, int y) {
     printf("OK\n");
 }
 
-// Update traversal costs for a central hex and its surrounding rings
+// Update costs for the central hex and its surrounding rings
 void change_cost(int x, int y, int v, int range) {
     int row, column, result, distance = 1, i = 0, j = 0;
     float part_result, max;
-    axial_coordinates *ring;
 
     if (grid == NULL || range <= 0 || v < -10 || v > 10 || x < 0 || y < 0 || x >= current_columns || y >= current_rows) {
         printf("KO\n");
@@ -153,6 +152,9 @@ void change_cost(int x, int y, int v, int range) {
         }
     }
 
+    // array to contain the rings around the central hex, sized for the max possible distance (range)
+    axial_coordinates ring[range * 6];
+
     // Process outward rings up to the specified range
     while (distance < range) {
 
@@ -162,7 +164,7 @@ void change_cost(int x, int y, int v, int range) {
         else max = 0;
         result = (int)floorf((float)v * max);
 
-        ring = calc_ring(x, y, distance);
+        calc_ring(x, y, distance, ring);
         for (int k = 0; k < distance * 6; k++) {
             row = ring[k].y;
             column = ring[k].x;
@@ -175,13 +177,13 @@ void change_cost(int x, int y, int v, int range) {
             if (grid[row][column].cost > 100)
                 grid[row][column].cost = 100;
             if (grid[row][column].route != NULL) {
+                i = 0;
                 while (grid[row][column].route[i].cost != -1 && i < MAX_AIR_ROUTE) {
                     grid[row][column].route[i].cost = grid[row][column].cost;
                     i++;
                 }
             }
         }
-        free(ring);
         distance++;
     }
     clear_cache();
@@ -189,9 +191,8 @@ void change_cost(int x, int y, int v, int range) {
 }
 
 // Return an array of all hex coordinates forming a ring at a given distance
-axial_coordinates* calc_ring(int x, int y, int distance) {
+void calc_ring(int x, int y, int distance, axial_coordinates *ring) {
     int current_x = x + distance, current_y = y, neighbours = 0;
-    axial_coordinates *ring = malloc(distance * MAX_NEIGHBOURS * sizeof(axial_coordinates));
 
     for (int i = 0; i < MAX_NEIGHBOURS; i++) {
         for (int j = 0; j < distance; j++) {
@@ -208,7 +209,6 @@ axial_coordinates* calc_ring(int x, int y, int distance) {
             neighbours++;
         }
     }
-    return ring;
 }
 
 // Toggle an air route between two hexes, max 5 routes per hex
